@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズNEKOMONEA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #001f3f;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            font-size: 60px;
+            letter-spacing: 2px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            margin: 10px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background-color: #ffcc00;
+            color: #000;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #quiz-container {
+            display: none;
+            background-color: #001f3f;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #quiz-container h2 {
+            background-color: #000;
+            color: #ffffff;
+            padding: 10px;
+            border: 2px solid #00bfff;
+            border-radius: 5px;
+            font-size: 24px;
+            margin: 0;
+            height: 3em;
+            line-height: 3em;
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .choice-container {
+            margin-top: 10px; /* 選択肢の間隔を小さく */
+        }
+
+        .choice-container div {
+            display: inline-block;
+            margin: 3px; /* 選択肢の間隔をさらに小さく */
+        }
+
+        .choice {
+            background-color: #000000;
+            color: #ffcc00;
+            border: 2px solid #00bfff;
+            padding: 20px; /* 選択肢の大きさを少し大きく */
+            margin: 5px;   /* 選択肢の間隔を小さく */
+            font-size: 22px; /* 選択肢の文字サイズを大きく */
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-block;
+            width: 350px; /* 横幅を少し大きく */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .choice span {
+            color: #ffcc00;
+        }
+
+        .choice .text {
+            color: #fff;
+        }
+
+        .choice.selected {
+            background-color: #00bfff;
+            color: #000;
+        }
+
+        .choice.correct {
+            background-color: #F58220;
+            color: #000 !important;
+        }
+
+        .choice.correct .text {
+            color: #000 !important;
+        }
+
+        .choice.incorrect {
+            background-color: #ff0000;
+            color: #000 !important;
+        }
+
+        .choice.incorrect .text {
+            color: #000 !important;
+        }
+
+        #submit-answer, #back-to-start {
+            display: block;
+            margin: 20px auto;
+        }
+
+        #submit-answer {
+            background-color: #ffcc00;
+            color: #000;
+        }
+
+        #back-to-start {
+            display: none;
+            background-color: #ffcc00;
+            color: #000;
+        }
+
+        .volume-control {
+            margin-top: 20px;
+        }
+
+        .volume-control label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>NEKOMONEA</h1> <!-- タイトル -->
+
+    <!-- クイズ作成フォーム -->
+    <form id="quiz-form">
+        <div class="input-field">
+            <label for="question">問題文:</label>
+            <input type="text" id="question" required>
+        </div>
+        <div class="input-field">
+            <label for="choiceA">選択肢A:</label>
+            <input type="text" id="choiceA" required>
+        </div>
+        <div class="input-field">
+            <label for="choiceB">選択肢B:</label>
+            <input type="text" id="choiceB" required>
+        </div>
+        <div class="input-field">
+            <label for="choiceC">選択肢C:</label>
+            <input type="text" id="choiceC" required>
+        </div>
+        <div class="input-field">
+            <label for="choiceD">選択肢D:</label>
+            <input type="text" id="choiceD" required>
+        </div>
+        <div class="input-field">
+            <label>正解:</label>
+            <label><input type="radio" name="correct-answer" value="A" required> A</label>
+            <label><input type="radio" name="correct-answer" value="B"> B</label>
+            <label><input type="radio" name="correct-answer" value="C"> C</label>
+            <label><input type="radio" name="correct-answer" value="D"> D</label>
+        </div>
+        <div class="input-field">
+            <label for="bgm">BGMアップロード:</label>
+            <input type="file" id="bgm" accept="audio/*">
+        </div>
+        <div class="input-field">
+            <label for="sound-effect">効果音アップロード:</label>
+            <input type="file" id="sound-effect" accept="audio/*">
+        </div>
+        <button type="submit">クイズ開始</button>
+    </form>
+
+    <!-- クイズ表示部分 -->
+    <div id="quiz-container">
+        <h2 id="display-question"></h2>
+        <div class="choice-container">
+            <div><button class="choice" id="optionA"><span>A:</span> <span class="text"></span></button></div>
+            <div><button class="choice" id="optionB"><span>B:</span> <span class="text"></span></button></div>
+        </div>
+        <div class="choice-container">
+            <div><button class="choice" id="optionC"><span>C:</span> <span class="text"></span></button></div>
+            <div><button class="choice" id="optionD"><span>D:</span> <span class="text"></span></button></div>
+        </div>
+        <button id="submit-answer">ファイナルアンサー</button>
+        <button id="back-to-start">最初のページに戻る</button>
+        <div class="volume-control">
+            <label for="volume">音量調整:</label>
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+    </div>
+
+    <!-- 音声ファイル -->
+    <audio id="bgm-player" preload="auto" loop></audio>
+    <audio id="effect-sound" preload="auto"></audio>
+
+    <script>
+        const quizForm = document.getElementById('quiz-form');
+        const quizContainer = document.getElementById('quiz-container');
+        const displayQuestion = document.getElementById('display-question');
+        const optionA = document.getElementById('optionA');
+        const optionB = document.getElementById('optionB');
+        const optionC = document.getElementById('optionC');
+        const optionD = document.getElementById('optionD');
+        const submitAnswerButton = document.getElementById('submit-answer');
+        const backToStartButton = document.getElementById('back-to-start');
+        const bgmPlayer = document.getElementById('bgm-player');
+        const effectSound = document.getElementById('effect-sound');
+        const volumeControl = document.getElementById('volume');
+
+        let correctAnswer = '';
+        let bgmFile = null;
+        let soundEffectFile = null;
+
+        quizForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const question = document.getElementById('question').value;
+            const choiceA = document.getElementById('choiceA').value;
+            const choiceB = document.getElementById('choiceB').value;
+            const choiceC = document.getElementById('choiceC').value;
+            const choiceD = document.getElementById('choiceD').value;
+            correctAnswer = document.querySelector('input[name="correct-answer"]:checked').value;
+
+            displayQuestion.innerText = question;
+            optionA.querySelector('.text').innerText = choiceA;
+            optionB.querySelector('.text').innerText = choiceB;
+            optionC.querySelector('.text').innerText = choiceC;
+            optionD.querySelector('.text').innerText = choiceD;
+
+            quizForm.style.display = 'none';
+            quizContainer.style.display = 'block';
+
+            bgmFile = document.getElementById('bgm').files[0];
+            soundEffectFile = document.getElementById('sound-effect').files[0];
+
+            if (bgmFile) {
+                const bgmURL = URL.createObjectURL(bgmFile);
+                bgmPlayer.src = bgmURL;
+                bgmPlayer.play();
+            }
+
+            optionA.classList.remove('correct', 'incorrect', 'selected');
+            optionB.classList.remove('correct', 'incorrect', 'selected');
+            optionC.classList.remove('correct', 'incorrect', 'selected');
+            optionD.classList.remove('correct', 'incorrect', 'selected');
+        });
+
+        optionA.addEventListener('click', () => selectAnswer(optionA));
+        optionB.addEventListener('click', () => selectAnswer(optionB));
+        optionC.addEventListener('click', () => selectAnswer(optionC));
+        optionD.addEventListener('click', () => selectAnswer(optionD));
+
+        function selectAnswer(selectedOption) {
+            optionA.classList.remove('selected');
+            optionB.classList.remove('selected');
+            optionC.classList.remove('selected');
+            optionD.classList.remove('selected');
+            selectedOption.classList.add('selected');
+
+            // BGMを停止
+            bgmPlayer.pause();
+        }
+
+        submitAnswerButton.addEventListener('click', () => {
+            const selectedOption = document.querySelector('.choice.selected');
+            if (!selectedOption) return;
+
+            const selectedAnswer = selectedOption.id.replace('option', '');
+            if (selectedAnswer === correctAnswer) {
+                selectedOption.classList.add('correct');
+            } else {
+                selectedOption.classList.add('incorrect');
+                document.getElementById(`option${correctAnswer}`).classList.add('correct');
+            }
+
+            if (soundEffectFile) {
+                const soundEffectURL = URL.createObjectURL(soundEffectFile);
+                effectSound.src = soundEffectURL;
+                effectSound.play();
+            }
+
+            submitAnswerButton.style.display = 'none';
+            backToStartButton.style.display = 'block';
+        });
+
+        backToStartButton.addEventListener('click', () => {
+            quizForm.style.display = 'block';
+            quizContainer.style.display = 'none';
+            backToStartButton.style.display = 'none';
+            submitAnswerButton.style.display = 'block';
+        });
+
+        volumeControl.addEventListener('input', (event) => {
+            bgmPlayer.volume = event.target.value;
+            effectSound.volume = event.target.value;
+        });
+    </script>
+
+</body>
+</html>
